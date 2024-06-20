@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Club {
+  cid      Int         @id @default(autoincrement())
+  email    String         @unique
+  password String
+  name        String	  @unique
+  description String?
+  instagram   String?
+  discord     String?
+  event    Event[] // Event referencing Club, one-to-many relation
+  category ClubCategory[] // ClubCategory, many-to-many relation
+}
+
+model Event {
+  eid         Int   @id @default(autoincrement())
+  cid         Int
+  club        Club     @relation(fields: [cid], references: [cid])
+  title       String
+  description String?
+  location    String?
+  start_time  DateTime?
+  end_time    DateTime?
+  posted_time DateTime @default(now())
+}
+
+model Category {
+  type String         @id
+  club ClubCategory[]
+}
+
+model ClubCategory {
+  cid      Int
+  club     Club     @relation(fields: [cid], references: [cid])
+  type     String
+  category Category @relation(fields: [type], references: [type])
+
+  @@id([cid, type]) // Identify by club and their category
+}
